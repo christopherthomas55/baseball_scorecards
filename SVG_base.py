@@ -7,6 +7,7 @@ class SVGElement:
     def __init__(self, name, **kwargs):
         self.attributes = kwargs
         self.name = name
+        self.text = None
         pass
 
     def add_atrributes(self, **kwargs):
@@ -19,10 +20,17 @@ class SVGElement:
         for attr, val in attri_dict.items():
             self.attributes[attr] = val
 
+    def add_text(self, text):
+        self.text = text
+
     def get_xml(self):
         assert(self.name)
         out = ' '.join(['{attr}="{val}"'.format(attr=attr, val=val) for attr, val in self.attributes.items()])
-        return "<{name} {out} />\n".format(name=self.name, out=out)
+        if self.text is None:
+            return "<{name} {out} />\n".format(name=self.name, out=out)
+        else:
+            return "<{name} {out}>{text}</{name}>\n".format(name=self.name, text=self.text, out=out)
+
 
 # TODO - add grouping functionality
 class SVGBase:
@@ -60,9 +68,15 @@ class SVGBase:
     def add_semicircle(self):
         pass
 
-    def add_text(self, text):
+    def add_text(self, text, attributes):
         # Yes....not handling quotes well yet
         assert("'" not in text)
+        must_have = ["x", "y", "textLength"]
+        assert(all([x in attributes for x in must_have]))
+        temp = SVGElement("text")
+        temp.add_attribute_dict(attributes)
+        temp.add_text(text)
+        self.children.append(temp)
 
     def add_custom(self, name, attributes):
         pass

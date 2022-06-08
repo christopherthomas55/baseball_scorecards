@@ -12,16 +12,31 @@ BASE_HEADER = """
 
 # Numeric values are stored as proportions of larger element, kinda like css
 DEFAULT_SCOREBOOK = {
-        # Scorecard grid
+
+        "margin": .01,
+
+        # Scorecard grid is base location, consider it global
         "grid_x0": .2,
         "grid_x1": .9,
         "grid_y0": .2,
         "grid_y1": .8,
+
+        # Label size for everything even with scorecard (scorecard, player
+        # names, counting stats
+        "label_h": .03,
+
+        # Scorecard grid specifis
         "isCount": True,
         "isBases": True,
-
-        # Have to be less than .95
-        "Bases_prop": .75,
+        "Bases_prop": .75, # Have to be less than .95
         "numInnings": 10,
         "numBatters": 9,
+
+        # Player name grid specifics
+        "numSubs": 2,
+        "is_player_margin": 0,
+
+        # Counting stats
+        "counting_stats": ["R", "H", "RBI"],
+        "is_sum_margin": 0,
 }

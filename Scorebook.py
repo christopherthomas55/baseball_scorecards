@@ -32,6 +32,12 @@ class Scorebook(SVGBase):
 
         # Generate in order of use, for ease in future
         for x in range(numInnings):
+            self._add_label(str(x), grid_start_x + x*cell_x_size,
+                    grid_start_x + (x+1)*cell_x_size,
+                    grid_start_y - self.height*self.options["label_h"],
+                    grid_start_y
+            )
+
             for y in range(numBatters):
                 self._add_ab_cell(
                         grid_start_x + x*cell_x_size,
@@ -70,13 +76,41 @@ class Scorebook(SVGBase):
 
         self.add_polyline({"fill":"none", "stroke": "black", "points": polyline_points})
 
+    def _add_label(self, label, x0, x1, y0, y1):
+        self.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),
+            "height":str(y1-y0), "stroke":"black", "x":str(x0), "y":str(y0)})
 
-
-
-
+        self.add_text(label, {"x":str(x0), "y":str(y1), "textLength":str(x1-x0)})
+        pass
 
     def _gen_player_names(self):
-        pass
+        # ODO - Reused code from genning the innings grid
+        # All based on center, the scorecard
+        grid_start_x = self.options["margin"]*self.width
+        grid_end_x   = (self.options["grid_x0"] - self.options["is_player_margin"]*self.options["margin"])*self.width
+        grid_start_y = self.options["grid_y0"]*self.height
+        grid_end_y   = self.options["grid_y1"]*self.height
+        numBatters = self.options["numBatters"]
+
+        cell_y_size  = (grid_end_y - grid_start_y)/float(numBatters)
+
+
+        # Generate in order of use, for ease in future
+        for y in range(numBatters):
+            self._add_player_cell(
+                grid_start_x,
+                grid_end_x,
+                grid_start_y + y*cell_y_size,
+                grid_start_y + (y+1)*cell_y_size
+            )
+
+    def _add_player_cell(self, x0, x1, y0, y1):
+        numSubs = self.options["numSubs"]
+        for count in range(numSubs):
+            self.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),
+                "height":str((y1-y0)/float(numSubs)), "stroke":"black", "x":str(x0), "y":str(y0 + count*(y1-y0)/float(numSubs))})
+
+
 
     def _gen_counting_stats(self):
         pass
