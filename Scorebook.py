@@ -32,7 +32,7 @@ class Scorebook(SVGBase):
 
         # Generate in order of use, for ease in future
         for x in range(numInnings):
-            self._add_label(str(x), grid_start_x + x*cell_x_size,
+            self._add_label(str(x+1), grid_start_x + x*cell_x_size,
                     grid_start_x + (x+1)*cell_x_size,
                     grid_start_y - self.height*self.options["label_h"],
                     grid_start_y
@@ -78,9 +78,15 @@ class Scorebook(SVGBase):
 
     def _add_label(self, label, x0, x1, y0, y1):
         self.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),
-            "height":str(y1-y0), "stroke":"black", "x":str(x0), "y":str(y0)})
+            "height":str(y1-y0), "stroke":"black", "x":str(x0), "y":str(y0)}
+        )
 
-        self.add_text(label, {"x":str(x0), "y":str(y1), "textLength":str(x1-x0)})
+        self.add_text(label, {"x":str(x0), "y":str((y1 + y0)/2.0),
+            "dominant-baseline": "middle",
+            "textLength":str(x1-x0), "lengthAdjust": "spacingAndGlyphs",
+            "length-percentage":str(100)}
+        )
+
         pass
 
     # TODO - Reused code from genning the innings grid
