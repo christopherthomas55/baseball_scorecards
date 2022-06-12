@@ -16,7 +16,7 @@ DEFAULT_SCOREBOOK = {
         "margin": .01,
 
         # Scorecard grid is base location, consider it global
-        "grid_x0": .2,
+        "grid_x0": .22,
         "grid_x1": .9,
         "grid_y0": .2,
         "grid_y1": .8,
@@ -35,8 +35,9 @@ DEFAULT_SCOREBOOK = {
         # Player name grid specifics
         "numSubs": 2,
         "is_player_margin": 0,
+        "pname_cell_size": 0.7,
 
         # Counting stats
-        "counting_stats": ["R", "H", "RBI"],
+        "counting_stats": ["R", "H", "LOB"],
         "is_sum_margin": 0,
 }

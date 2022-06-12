@@ -49,7 +49,7 @@ class SVGBase:
         self.children.append(temp)
 
     def add_line(self, attributes):
-        must_have = ["x1", "y1", "x2", "y2", "stroke", "stroke-width"]
+        must_have = ["x1", "y1", "x2", "y2"]
         assert(all([x in attributes for x in must_have]))
         temp = SVGElement("line")
         temp.add_attribute_dict(attributes)
