@@ -71,7 +71,7 @@ class SVGBase:
     def add_text(self, text, attributes):
         # Yes....not handling quotes well yet
         assert("'" not in text)
-        must_have = ["x", "y", "textLength"]
+        must_have = ["x", "y"]
         assert(all([x in attributes for x in must_have]))
         temp = SVGElement("text")
         temp.add_attribute_dict(attributes)

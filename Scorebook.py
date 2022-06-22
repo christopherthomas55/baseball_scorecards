@@ -1,5 +1,7 @@
+import json
 import config
 from SVG_base import SVGBase
+
 
 class Scorebook(SVGBase):
     # Inherits add_SHAPE and save
@@ -10,6 +12,9 @@ class Scorebook(SVGBase):
         #TODO - Fill with default, not replace
         if not self.options:
             self.options = config.DEFAULT_SCOREBOOK
+
+        with open('live_jun_21_stros.json', 'r') as f:
+            self.json = json.load(f)
 
         self._gen_grid()
         self._gen_player_names()
@@ -81,10 +86,24 @@ class Scorebook(SVGBase):
             "height":str(y1-y0), "stroke":"black", "x":str(x0), "y":str(y0)}
         )
 
-        self.add_text(label, {"x":str(x0), "y":str((y1 + y0)/2.0),
+        self.add_text(label, {"x":str(x0 + 10), "y":str((y1 + y0)/2.0),
             "dominant-baseline": "middle",
-            "textLength":str(x1-x0), "lengthAdjust": "spacingAndGlyphs",
-            "length-percentage":str(100)}
+            "font-size": "x-large"
+            #"textLength":str(x1-x0), "lengthAdjust": "spacingAndGlyphs",
+            #"length-percentage":str(100)
+            }
+        )
+
+        pass
+
+    def _add_text(self, label, x0, x1, y0, y1):
+
+        self.add_text(label, {"x":str(x0 + 10), "y":str((y1 + y0)/2.0),
+            "dominant-baseline": "middle",
+            "font-size": "x-large"
+            #"textLength":str(x1-x0), "lengthAdjust": "spacingAndGlyphs",
+            #"length-percentage":str(100)
+            }
         )
 
         pass
@@ -92,14 +111,14 @@ class Scorebook(SVGBase):
     # TODO - Reused code from genning the innings grid
     # All based on center, the scorecard
     def _gen_player_names(self):
+
+        # Location stuff
         grid_start_x = self.options["margin"]*self.width
         grid_end_x   = (self.options["grid_x0"] - self.options["is_player_margin"]*self.options["margin"])*self.width
         grid_start_y = self.options["grid_y0"]*self.height
         grid_end_y   = self.options["grid_y1"]*self.height
         numBatters = self.options["numBatters"]
-
         cell_y_size  = (grid_end_y - grid_start_y)/float(numBatters)
-
         number_x = grid_start_x + (grid_end_x - grid_start_x)*((1 - self.options['pname_cell_size'])/2.0)
         position_x = grid_end_x - (grid_end_x - grid_start_x)*((1 - self.options['pname_cell_size'])/2.0)
 
@@ -120,12 +139,27 @@ class Scorebook(SVGBase):
                 grid_start_y - self.height*self.options["label_h"],
                 grid_start_y
         )
+
+        home_or_away = 'home'
+        batting_order = self.json['liveData']['boxscore']['teams'][home_or_away]['battingOrder']
+        batting_names = [self.json['gameData']['players']['ID' + str(i)]['lastFirstName'] for i in batting_order]
+
+        print(batting_names)
+        # JSON player name stuff
+
         # Generate in order of use, for ease in future
-        for y in range(numBatters):
+        for count, y in enumerate(range(numBatters)):
             self._add_cell(
                 grid_start_x,
                 grid_end_x,
                 grid_start_y + y*cell_y_size,
+                grid_start_y + (y+1)*cell_y_size
+            )
+
+            self._add_text(batting_names[count],
+                grid_start_x + (grid_end_x - grid_start_x)*(1 - self.options['pname_cell_size'])/2.0,
+                grid_start_x + (grid_end_x - grid_start_x)*(1 - self.options['pname_cell_size'])/2.0,
+                grid_start_y + y*cell_y_size - self.height*self.options["label_h"],
                 grid_start_y + (y+1)*cell_y_size
             )
 
