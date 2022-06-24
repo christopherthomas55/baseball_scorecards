@@ -2,19 +2,116 @@ import json
 import config
 from SVG_base import SVGBase
 
+class ABCell(object):
+    def __init__(self, parent, x0, x1, y0, y1):
+        self.parent = parent
+        self.x0 = x0
+        self.x1 = x1
+        self.y0 = y0
+        self.y1 = y1
+
+
+        parent.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),
+            "height":str(y1-y0), "stroke":"black", "x":str(x0), "y":str(y0)})
+
+        # Diamond is always a diamond not rhombus
+        max_height = parent.options["Bases_prop"]*(y1-y0)
+        max_width  = parent.options["Bases_prop"]*(x1-x0)
+        diamond_size = min(max_height, max_width)
+
+        # Aligning diamond based of max height and width allowed
+        # If scoresheet grids aren't very square may have issues
+        d_center_x = x1 - diamond_size/2.0 - (x1 - x0)*.05
+        d_center_y = y1 - diamond_size/2.0 - (y1 - y0)*.05
+
+        polyline_points = ""
+        # Home
+        polyline_points += str(d_center_x) + "," + str(d_center_y + diamond_size/2.0) + " "
+        # 1st
+        polyline_points += str(d_center_x + diamond_size/2.0)+ "," + str(d_center_y)  + " "
+        # 2rd
+        polyline_points += str(d_center_x) + "," + str(d_center_y - diamond_size/2.0) + " "
+        # 3rd
+        polyline_points += str(d_center_x - diamond_size/2.0)+ "," + str(d_center_y)  + " "
+        # Home again
+        polyline_points += str(d_center_x) + "," + str(d_center_y + diamond_size/2.0) + " "
+
+        parent.add_polyline({"fill":"none", "stroke": "black", "points": polyline_points})
+
+    def add_text(self, text):
+        self.parent._add_text(text, self.x0, self.x1, self.y0, self.y1)
+
+class ABCellHolder(object):
+    def __init__(self, parent):
+        self.all_abs = []
+        self.parent = parent
+        self.json = None
+        pass
+
+    def _add_ab_cell(self, *args):
+        self.all_abs.append( ABCell(*args) )
+
+    def add_json(self, json):
+        self.json = json
+
+
+    def gen(self):
+        pointer = 0
+        count = 0
+        inning = 1
+        looped = 0
+        for x in self.json['liveData']['plays']['allPlays']:
+            if x['result']['type'] == 'atBat' and not x['about']['isTopInning']:
+                if x['result'].get('eventType'):
+                    print(x['result']['eventType'])
+                    self.all_abs[pointer].add_text(x['result']["eventType"])
+
+                    if x['about']['hasOut']:
+                        count += 1
+
+                    if "double_play" in x['result'].get('eventType').lower():
+                        count += 1
+
+                    if count == 3:
+                        print(pointer)
+                        count = 0
+                        inning += 1
+                        if (pointer+1)%9 == 0:
+                            print("THIS EVENT")
+                            pass
+                        else:
+                            pointer += 10
+
+                        print("Inning %d over\n"%(inning))
+                    elif ((pointer+1)%9 == 0) and count < 3: # to be explicit
+                        pointer -= 8
+                        # Not testing looped yet but good to track
+                        looped += 1
+                    else:
+                        pointer += 1
+
+
+
+
+
+
+
 
 class Scorebook(SVGBase):
     # Inherits add_SHAPE and save
     def __init__(self, *args, **kwargs):
         super().__init__()
         self.options = kwargs
+        self.ABs = ABCellHolder(parent=self)
 
         #TODO - Fill with default, not replace
         if not self.options:
             self.options = config.DEFAULT_SCOREBOOK
 
-        with open('live_jun_21_stros.json', 'r') as f:
+        with open('example_data2.json', 'r') as f:
             self.json = json.load(f)
+
+        self.ABs.add_json(self.json)
 
         self._gen_grid()
         self._gen_player_names()
@@ -22,6 +119,7 @@ class Scorebook(SVGBase):
 
         self._gen_pitching_stats()
         self._gen_meta_stats()
+        self.ABs.gen()
 
     def _gen_grid(self):
         numInnings = self.options["numInnings"]
@@ -44,42 +142,14 @@ class Scorebook(SVGBase):
             )
 
             for y in range(numBatters):
-                self._add_ab_cell(
+                self.ABs._add_ab_cell(
+                        self,
                         grid_start_x + x*cell_x_size,
                         grid_start_x + (x+1)*cell_x_size,
                         grid_start_y + y*cell_y_size,
                         grid_start_y + (y+1)*cell_y_size
                 )
 
-    # TODO - THink about making square
-    def _add_ab_cell(self, x0, x1, y0, y1):
-        self.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),
-            "height":str(y1-y0), "stroke":"black", "x":str(x0), "y":str(y0)})
-
-
-        # Diamond is always a diamond not rhombus
-        max_height = self.options["Bases_prop"]*(y1-y0)
-        max_width  = self.options["Bases_prop"]*(x1-x0)
-        diamond_size = min(max_height, max_width)
-
-        # Aligning diamond based of max height and width allowed
-        # If scoresheet grids aren't very square may have issues
-        d_center_x = x1 - diamond_size/2.0 - (x1 - x0)*.05
-        d_center_y = y1 - diamond_size/2.0 - (y1 - y0)*.05
-
-        polyline_points = ""
-        # Home
-        polyline_points += str(d_center_x) + "," + str(d_center_y + diamond_size/2.0) + " "
-        # 1st
-        polyline_points += str(d_center_x + diamond_size/2.0)+ "," + str(d_center_y)  + " "
-        # 2rd
-        polyline_points += str(d_center_x) + "," + str(d_center_y - diamond_size/2.0) + " "
-        # 3rd
-        polyline_points += str(d_center_x - diamond_size/2.0)+ "," + str(d_center_y)  + " "
-        # Home again
-        polyline_points += str(d_center_x) + "," + str(d_center_y + diamond_size/2.0) + " "
-
-        self.add_polyline({"fill":"none", "stroke": "black", "points": polyline_points})
 
     def _add_label(self, label, x0, x1, y0, y1):
         self.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),
@@ -227,4 +297,4 @@ class Scorebook(SVGBase):
 
 if __name__ == "__main__":
     test = Scorebook()
-    test.save("blank_scorebook.svg")
+    test.save("not_so_blank_scorebook.svg")

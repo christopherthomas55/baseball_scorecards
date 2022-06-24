@@ -29,7 +29,7 @@ DEFAULT_SCOREBOOK = {
         "isCount": True,
         "isBases": True,
         "Bases_prop": .75, # Have to be less than .95
-        "numInnings": 10,
+        "numInnings": 12,
         "numBatters": 9,
 
         # Player name grid specifics
