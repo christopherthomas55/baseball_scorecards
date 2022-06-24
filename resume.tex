@@ -1,0 +1,120 @@
+%% Copyright 2006-2015 Xavier Danaux (xdanaux@gmail.com), 2020-2022 moderncv maintainers (github.com/moderncv).
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License version 1.3c,
+% available at http://www.latex-project.org/lppl/.
+
+
+\documentclass[10pt,a4paper,sans, dvipsnames]{moderncv}        % possible options include font size ('10pt', '11pt' and '12pt'), paper size ('a4paper', 'letterpaper', 'a5paper', 'legalpaper', 'executivepaper' and 'landscape') and font family ('sans' and 'roman')
+
+% moderncv themes
+\moderncvstyle{banking}                             % style options are 'casual' (default), 'classic', 'banking', 'oldstyle' and 'fancy'
+\moderncvcolor{burgundy}                               % color options 'black', 'blue' (default), 'burgundy', 'green', 'grey', 'orange', 'purple' and 'red'
+% adjust the page margins
+\usepackage[scale=0.85]{geometry}
+\setlength{\footskip}{136.00005pt}                 % depending on the amount of information in the footer, you need to change this value. comment this line out and set it to the size given in the warning
+%\setlength{\hintscolumnwidth}{3cm}                % if you want to change the width of the column with the dates
+%\setlength{\makecvheadnamewidth}{10cm}            % for the 'classic' style, if you want to force the width allocated to your name and avoid line breaks. be careful though, the length is normally calculated to avoid any overlap with your personal info; use this at your own typographical risks...
+
+% Fun colors
+
+% font loading
+% for luatex and xetex, do not use inputenc and fontenc
+% see https://tex.stackexchange.com/a/496643
+\ifxetexorluatex
+  \usepackage{fontspec}
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX}
+  \setmainfont{Latin Modern Roman}
+  \setsansfont{Latin Modern Sans}
+  \setmonofont{Latin Modern Mono}
+  \setmathfont{Latin Modern Math} 
+\else
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{lmodern}
+\fi
+
+% document language
+\usepackage[english]{babel}  % FIXME: using spanish breaks moderncv
+
+% personal data
+\name{Chris}{Thomas}
+\address{Houston, TX (Looking to relocate)}      % TODO - Remember to remove if applying in Houston
+\phone[mobile]{(512)~461~7770}                   % optional, remove / comment the line if not wanted; the optional "type" of the phone can be "mobile" (default), "fixed" or "fax"
+\email{christopherthomas55@gmail.com}                               % optional, remove / comment the line if not wanted
+\social[github]{christopherthomas55}                              % optional, remove / comment the line if not wanted
+\social[linkedin]{christophersthomas}                        % optional, remove / comment the line if not wanted
+
+% https://tex.stackexchange.com/questions/348671/delete-the-space-below-the-header-in-moderncv
+\usepackage{xpatch}
+\xpatchcmd\makecvhead{1.25em}{0em}{}{}
+\xpatchcmd\makecvhead{[b]}{[t]}{}{}
+\xpatchcmd\makecvhead{[b]}{[t]}{}{}
+\xpatchcmd\makecvhead{[b]}{[t]}{}{}
+\makeatletter
+\xpatchcmd\makecvhead
+    {\includegraphics[width=\@photowidth]{\@photo}}%
+    {\raisebox{-1.6cm}{\includegraphics[width=\@photowidth]{\@photo}}}%
+    {}{}
+\makeatother
+
+% Putting the at begin cause - https://tex.stackexchange.com/questions/14306/link-formatting-colors-underlines-in-moderncv
+\newcommand\Colorhref[3][RoyalBlue]{\href{#2}{\color{#1}#3}}
+
+%----------------------------------------------------------------------------------
+%            content
+%----------------------------------------------------------------------------------
+\begin{document}
+
+%-----       resume       ---------------------------------------------------------
+\makecvtitle
+% \vspace*{-40mm}
+
+\section{Summary}
+%Software/Data Science startups
+% 4 years Data engineer with broad knowledge base. Always learning something new. I work best in dynamic, small teams where I have to do and learn a lot, fast!
+
+% More corporate places
+Data Engineer with 4 years of wide-ranging tech experience. Eager to work with a larger technology stack and further broaden knowledge base.
+
+
+\section{Experience}
+\cventry{May 2021--Current}{Engineer}{Mesos}{Houston, TX}{}{Startup focusing on high frequency and high resolution monitoring of pipelines using aerial platforms and AI algorithms}
+\begin{itemize}
+\item Collaborated with a team of 4 to assemble fixed-wing RC drones with camera payloads. Focused on electrical components and flight programming using Ardupilot
+\item Developed image processing and storage solution using Python, Postgres, and open source stitching tools
+\item Designed prototype online image distribution and monitoring platform using flask backend and bootstrap templates with jQuery
+\end{itemize}
+\vspace{3mm}
+\cventry{June 2018--May 2021}{Data Engineer}{Bazean}{Houston, TX}{}{Private Equity firm focusing on using technology to improve energy investment efficiency and environmental impact}
+\begin{itemize}
+\item Created and maintained full data pipelines from web scrapers to customer facing views using Python, C++, and Postgres
+\item Built satellite imagery ingestion and neural networks in TensorFlow to assist classifying fracs and improve manual classification speed 5-10x times
+\item Presented Jupyter notebooks to leadership based on internally generated oil and gas datasets 
+\item Implemented machine learning models using scikit-learn and numpy for well decline curves and well spacing
+\item Managed small project teams (up to 4) and successfully collaborated with office in Seattle and employees scattered throughout California
+\item Assisted with and maintained other smaller projects, including Angular apps, Excel automation, and Slack apps
+\end{itemize}
+
+\section{Education}
+\cventry{2014--2018}{BS of Mathematics}{Rice University}{Houston, TX}{GPA - \textit{3.85}}{}
+\subsection{Publications}
+T. Ajayi, C. Thomas, A. Schaefer. \textbf{The Gap Function: Evaluating Integer Programming Models over Multiple Right-Hand Sides} \textit{Operations Research}
+
+% Buzzword bingo. Everything I've worked with. Maybe put up top. Haven't decided
+\section{Technical Skills}
+\cvitem{Languages}{Python, SQL (Postgres), Javascript, C++, R} %TODO - Excel and Matlab for more corporate places
+\cvitem{Libraries}{Pandas, Numpy, TensorFlow, scikit-learn, jQuery, Angular}
+\cvitem{Other}{Linux, Git, Vim, GIS}
+
+\section{Hobbies and Side Projects}
+\cvitem{3D City Modeling Project}{\Colorhref{https://github.com/christopherthomas55/city_3d_model}{Link}. Generate 3D viewable and printable models of buildings from OpenStreetMap data. Learned openGL basics and refreshed C++}
+\cvitem{3D Printing Projects}{I run octoprint behind a personal OpenVPN server to control printer remotely. I also have some CAD designs on \Colorhref{https://github.com/christopherthomas55/cad_files}{github}}
+\cvitem{Amateur Radio License}{Technician Level. Callsign - KI5UBN}
+\cvitem{Other}{Baseball, running, card games, piano}
+% Only put in for more electronics focused places
+%\cvitem{Current Project}{Using Arduino to create lighting responsive to piano playing}
+
+\clearpage
+\end{document}
