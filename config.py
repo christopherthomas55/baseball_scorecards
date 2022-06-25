@@ -3,6 +3,7 @@ SCALE = 15.0
 
 # Sideways paper for now
 DEFAULT_WIDTH = 110*SCALE
+#DEFAULT_HEIGHT = 85*SCALE
 DEFAULT_HEIGHT = 85*SCALE
 
 # Stright from wikipedia lol
@@ -29,8 +30,13 @@ DEFAULT_SCOREBOOK = {
         "isCount": True,
         "isBases": True,
         "Bases_prop": .75, # Have to be less than .95
-        "numInnings": 12,
+        "numInnings": 10,
         "numBatters": 9,
+        # How big count boxes are as proportion
+        "count_size":.1,
+        # Where is play text?
+        "where_text_x": -.06,
+        "where_text_y": .48,
 
         # Player name grid specifics
         "numSubs": 2,
@@ -41,3 +47,4 @@ DEFAULT_SCOREBOOK = {
         "counting_stats": ["R", "H", "LOB"],
         "is_sum_margin": 0,
 }
+

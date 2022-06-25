@@ -2,6 +2,14 @@ import json
 import config
 from SVG_base import SVGBase
 
+play_map = {
+    "walk": "BB",
+    "single": "1B",
+    "double": "2B",
+    "triple": "3B",
+    "home_run":"HR"
+}
+
 class ABCell(object):
     def __init__(self, parent, x0, x1, y0, y1):
         self.parent = parent
@@ -14,15 +22,17 @@ class ABCell(object):
         parent.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),
             "height":str(y1-y0), "stroke":"black", "x":str(x0), "y":str(y0)})
 
+
+    def gen_diamond(self):
         # Diamond is always a diamond not rhombus
-        max_height = parent.options["Bases_prop"]*(y1-y0)
-        max_width  = parent.options["Bases_prop"]*(x1-x0)
+        max_height = self.parent.options["Bases_prop"]*(self.y1-self.y0)
+        max_width  = self.parent.options["Bases_prop"]*(self.x1-self.x0)
         diamond_size = min(max_height, max_width)
 
         # Aligning diamond based of max height and width allowed
         # If scoresheet grids aren't very square may have issues
-        d_center_x = x1 - diamond_size/2.0 - (x1 - x0)*.05
-        d_center_y = y1 - diamond_size/2.0 - (y1 - y0)*.05
+        d_center_x = self.x1 - diamond_size/2.0 - (self.x1 - self.x0)*.05
+        d_center_y = self.y1 - diamond_size/2.0 - (self.y1 - self.y0)*.05
 
         polyline_points = ""
         # Home
@@ -36,10 +46,51 @@ class ABCell(object):
         # Home again
         polyline_points += str(d_center_x) + "," + str(d_center_y + diamond_size/2.0) + " "
 
-        parent.add_polyline({"fill":"none", "stroke": "black", "points": polyline_points})
+        self.parent.add_polyline({"fill":"none", "stroke": "black", "points": polyline_points})
+
+
+
+        # strikes top
 
     def add_text(self, text):
         self.parent._add_text(text, self.x0, self.x1, self.y0, self.y1)
+
+    def add_play(self, play):
+        play_code = play['result']["eventType"]
+        text = play_map.get(play_code, play_code)
+        # Second x0 and y0 doesn't do anyhing
+        self.parent._add_text(text, self.x0 + (self.x1-self.x0)*self.parent.options["where_text_x"], self.x0, self.y0 + (self.y1 - self.y0)*self.parent.options["where_text_y"], self.y0 )
+
+
+    def add_count(self, count):
+        self.balls = count["balls"]
+        self.strikes = count["strikes"]
+
+        self.balls = min(self.balls, 3)
+        self.strikes = min(self.strikes, 2)
+
+        cbox_w = (self.x1-self.x0)*self.parent.options["count_size"]
+        cbox_h = (self.y1-self.y0)*self.parent.options["count_size"]
+
+        # Balls on bottom
+        for i in range(3):
+            opacity = 0.0
+            fill = "white"
+            if i < self.balls:
+                fill = "grey"
+                opacity = str(1.0)
+            self.parent.add_rect({"fill": fill, "fill-opacity":opacity, "width":str(cbox_w),
+            "height":str(cbox_h), "stroke":"black", "x":str(self.x0 + cbox_w*i), "y":str(self.y1 - cbox_h)})
+
+        for i in range(2):
+            opacity = 0.0
+            fill = "white"
+            if i < self.strikes:
+                fill = "grey"
+                opacity = str(1.0)
+            self.parent.add_rect({"fill": fill, "fill-opacity":opacity, "width":str(cbox_w),
+            "height":str(cbox_h), "stroke":"black", "x":str(self.x0 + cbox_w*i), "y":str(self.y1 - 2*cbox_h)})
+
 
 class ABCellHolder(object):
     def __init__(self, parent):
@@ -61,10 +112,13 @@ class ABCellHolder(object):
         inning = 1
         looped = 0
         for x in self.json['liveData']['plays']['allPlays']:
-            if x['result']['type'] == 'atBat' and not x['about']['isTopInning']:
+            isTop = self.parent.home_away == "away"
+            if x['result']['type'] == 'atBat' and (x['about']['isTopInning'] == isTop):
+                self.all_abs[pointer].add_count(x['count'])
+                self.all_abs[pointer].gen_diamond()
                 if x['result'].get('eventType'):
-                    print(x['result']['eventType'])
-                    self.all_abs[pointer].add_text(x['result']["eventType"])
+                    #print(x['result']['eventType'])
+                    self.all_abs[pointer].add_play(x)
 
                     if x['about']['hasOut']:
                         count += 1
@@ -73,16 +127,13 @@ class ABCellHolder(object):
                         count += 1
 
                     if count == 3:
-                        print(pointer)
                         count = 0
                         inning += 1
                         if (pointer+1)%9 == 0:
-                            print("THIS EVENT")
                             pass
                         else:
                             pointer += 10
 
-                        print("Inning %d over\n"%(inning))
                     elif ((pointer+1)%9 == 0) and count < 3: # to be explicit
                         pointer -= 8
                         # Not testing looped yet but good to track
@@ -99,16 +150,17 @@ class ABCellHolder(object):
 
 class Scorebook(SVGBase):
     # Inherits add_SHAPE and save
-    def __init__(self, *args, **kwargs):
+    def __init__(self, home_away, *args, **kwargs):
         super().__init__()
         self.options = kwargs
         self.ABs = ABCellHolder(parent=self)
+        self.home_away = home_away
 
         #TODO - Fill with default, not replace
         if not self.options:
             self.options = config.DEFAULT_SCOREBOOK
 
-        with open('example_data2.json', 'r') as f:
+        with open('live_data.json', 'r') as f:
             self.json = json.load(f)
 
         self.ABs.add_json(self.json)
@@ -210,11 +262,9 @@ class Scorebook(SVGBase):
                 grid_start_y
         )
 
-        home_or_away = 'home'
-        batting_order = self.json['liveData']['boxscore']['teams'][home_or_away]['battingOrder']
+        batting_order = self.json['liveData']['boxscore']['teams'][self.home_away]['battingOrder']
         batting_names = [self.json['gameData']['players']['ID' + str(i)]['lastFirstName'] for i in batting_order]
 
-        print(batting_names)
         # JSON player name stuff
 
         # Generate in order of use, for ease in future
@@ -296,5 +346,8 @@ class Scorebook(SVGBase):
 
 
 if __name__ == "__main__":
-    test = Scorebook()
-    test.save("not_so_blank_scorebook.svg")
+    home = Scorebook("home")
+    home.save("home_scorebook.svg")
+
+    away = Scorebook("away")
+    away.save("away_scorebook.svg")
