@@ -7,7 +7,8 @@ play_map = {
     "single": "1B",
     "double": "2B",
     "triple": "3B",
-    "home_run":"HR"
+    "home_run":"HR",
+    "strikeout": "K",
 }
 
 class ABCell(object):
@@ -17,6 +18,7 @@ class ABCell(object):
         self.x1 = x1
         self.y0 = y0
         self.y1 = y1
+        self.cell_w = self.x1 - self.x0
 
 
         parent.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),
@@ -27,12 +29,17 @@ class ABCell(object):
         # Diamond is always a diamond not rhombus
         max_height = self.parent.options["Bases_prop"]*(self.y1-self.y0)
         max_width  = self.parent.options["Bases_prop"]*(self.x1-self.x0)
-        diamond_size = min(max_height, max_width)
+        diamond_size = min(max_height, max_width) 
 
         # Aligning diamond based of max height and width allowed
-        # If scoresheet grids aren't very square may have issues
-        d_center_x = self.x1 - diamond_size/2.0 - (self.x1 - self.x0)*.05
-        d_center_y = self.y1 - diamond_size/2.0 - (self.y1 - self.y0)*.05
+        # If scoresheet grids aren't very square m# 
+        
+        # TODO - Fix this to be a config numbery have issues
+        self.d_center_x = self.x1 - diamond_size/2.0 - (self.x1 - self.x0)*.15
+        self.d_center_y = self.y1 - diamond_size/2.0 - (self.y1 - self.y0)*.15
+
+        d_center_x = self.d_center_x
+        d_center_y = self.d_center_y
 
         polyline_points = ""
         # Home
@@ -58,8 +65,22 @@ class ABCell(object):
     def add_play(self, play):
         play_code = play['result']["eventType"]
         text = play_map.get(play_code, play_code)
-        # Second x0 and y0 doesn't do anyhing
-        self.parent._add_text(text, self.x0 + (self.x1-self.x0)*self.parent.options["where_text_x"], self.x0, self.y0 + (self.y1 - self.y0)*self.parent.options["where_text_y"], self.y0 )
+
+        if play["about"]["hasOut"]:
+            # Second x and y don't do anyhing
+            self.parent._add_text(text, self.d_center_x - self.parent.options["center_offset"]*self.cell_w, self.d_center_x, self.d_center_y, self.d_center_y)
+
+            out_num = (str(play['runners'][-1]['movement']['outNumber']))
+            x = (self.d_center_x + self.x1 -.11*(self.x1 - self.x0))/2.0 # TODO - Fix .05 stranded
+            y = (self.d_center_y + self.y0 + .05*(self.y1 - self.y0))/2.0
+            self.parent._add_text(out_num, x, x, y, y)
+            # center x, center y, radius x, radius y
+            self.parent._add_ellipse(x, y, (self.x1 - self.x0)*.05, (self.x1 - self.x0)*.05, fill = "black", opacity = ".3")
+
+
+        else:
+            # Second x0 and y0 doesn't do anyhing
+            self.parent._add_text(text, self.x0 + (self.x1-self.x0)*self.parent.options["where_text_x"], self.x0, self.y0 + (self.y1 - self.y0)*self.parent.options["where_text_y"], self.y0 )
 
 
     def add_count(self, count):
@@ -130,7 +151,7 @@ class ABCellHolder(object):
                         count = 0
                         inning += 1
                         if (pointer+1)%9 == 0:
-                            pass
+                            pointer += 1
                         else:
                             pointer += 10
 
@@ -228,7 +249,9 @@ class Scorebook(SVGBase):
             }
         )
 
-        pass
+
+    def _add_ellipse(self, cx, cy, rx, ry, fill = "white", opacity = "0.05"):
+        self.add_ellipse({'cx': cx, 'cy': cy, 'rx': rx, 'ry': ry, 'fill': fill, 'opacity': opacity})
 
     # TODO - Reused code from genning the innings grid
     # All based on center, the scorecard

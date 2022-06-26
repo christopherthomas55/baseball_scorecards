@@ -34,9 +34,11 @@ DEFAULT_SCOREBOOK = {
         "numBatters": 9,
         # How big count boxes are as proportion
         "count_size":.1,
-        # Where is play text?
+        # Where is play text top left?
         "where_text_x": -.06,
         "where_text_y": .48,
+        # Offset to get outs in center of diamond
+        "center_offset": .15,
 
         # Player name grid specifics
         "numSubs": 2,
