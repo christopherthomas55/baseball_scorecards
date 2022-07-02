@@ -80,6 +80,6 @@ class ABCellHolder(object):
                     else:
                         grid_pointer += 1
 
-                    self.parent.save("%s_scorebook.svg"%self.parent.home_away)
                     if ANIMATED:
+                        raise Exception("Not implemented yet after directory change")
                         sleep(self.parent.options['wait_time'])
