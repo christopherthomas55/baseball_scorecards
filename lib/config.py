@@ -6,6 +6,8 @@ DEFAULT_WIDTH = 110*SCALE
 #DEFAULT_HEIGHT = 85*SCALE
 DEFAULT_HEIGHT = 85*SCALE
 
+ANIMATED = False
+
 # Stright from wikipedia lol
 BASE_HEADER = """
 <svg width="{width}" height="{width}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n
@@ -13,6 +15,8 @@ BASE_HEADER = """
 
 # Numeric values are stored as proportions of larger element, kinda like css
 DEFAULT_SCOREBOOK = {
+        # If looping whats wait time for each frame
+        "wait_time": .5,
 
         "margin": .01,
 
