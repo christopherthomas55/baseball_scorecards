@@ -20,9 +20,11 @@ class ABCellHolder(object):
 
     #TODO - Lots needed here.....
     def handle_runners(self, runners):
-        runners = [x for x in runners if not x["movement"]["isOut"]]
+        # Trying is false
+        runners = [x for x in runners if (x["movement"]["isOut"] is False)]
         destinations = {"1B": 1, "2B": 2, "3B": 3, "score": 4}
         # Sorting to start with highest bases first
+
         runners = sorted(runners, key= lambda x: -destinations[x["movement"]["end"]])
 
         for runner in runners:

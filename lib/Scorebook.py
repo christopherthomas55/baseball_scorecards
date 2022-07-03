@@ -3,6 +3,7 @@ import config
 from SVG_base import SVGBase
 from ABCellHolder import ABCellHolder
 from time import sleep
+from war_calc import war_calc
 
 class Scorebook(SVGBase):
     # Inherits add_SHAPE and save
@@ -182,7 +183,6 @@ class Scorebook(SVGBase):
             )
             prev = lines_x[x]
 
-
         cell_y_size  = (grid_end_y - grid_start_y)/float(numBatters)
         # Generate in order of use, for ease in future
         for y in range(numBatters):
@@ -205,12 +205,50 @@ class Scorebook(SVGBase):
 
 if __name__ == "__main__":
 
+
     if config.ANIMATED:
         while True:
             away = Scorebook("away")
             away.save("img/away_scorebook.svg")
-    else:
-        away = Scorebook("away")
-        away.save("img/away_scorebook.svg")
-        home = Scorebook("home")
-        home.save("img/home_scorebook.svg")
+            json = away.json
+            away_war_people = war_calc(json["home"]["runTotal"], json, json["lineup"])
+            print(away_war_people)
+
+    # Need to find every json call here f. Here I go
+    # Done so far :  ---
+    # Not done:      All
+
+    # I gotta get them from the json at least. json["home']] might be list
+    # comprehension though
+    home = Scorebook("home")
+    j = home.json
+    runTotal  = j["liveData"]["boxscore"]["teams"]["home"]["teamStats"]["batting"]["runs"]
+    home_json = [x for x in j["liveData"]["plays"]["allPlays"] if not x["about"]["isTopInning"]]
+
+    batting_order_ids = j["liveData"]["boxscore"]["teams"]["home"]["battingOrder"]
+    player_metadata   =  0 # Needs something json["home"]["lineup"]
+
+    player_metadata = j["gameData"]["players"]
+    lineup = [player_metadata[x] for x in player_metadata]
+    #print(lineup)
+
+    home.save("img/home_scorebook.svg")
+    home_war_people = war_calc(runTotal, home_json, lineup)
+    out = [(x, home_war_people[x]) for x in home_war_people.keys()]
+    out = sorted(out, key = lambda x: x[-1])
+    for i in out:
+        print("%s: %s \n"%(i[0], str(i[1])))
+    sys.exit()
+
+
+    away = Scorebook("away")
+    j = away.json
+    runTotal  = j["liveData"]["boxscore"]["teams"]["away"]["teamStats"]["batting"]["runs"]
+    away_json = [x for x in j["liveData"]["plays"]["allPlays"] if x["about"]["isTopInning"]]
+
+    batting_order_ids = j["liveData"]["boxscore"]["teams"]["away"]["battingOrder"]
+    lineup = [player_metadata[x] for x in player_metadata]
+
+    away.save("img/away_scorebook.svg")
+    away_war_people = war_calc(runTotal, away_json, lineup)
+    print(away_war_people)
