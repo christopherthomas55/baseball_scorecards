@@ -65,8 +65,12 @@ class SVGBase:
     def add_circle(self):
         pass
 
-    def add_semicircle(self):
-        pass
+    def add_ellipse(self, attributes):
+        must_have = ['cx', 'cy', 'rx', 'ry']
+        assert(all([x in attributes for x in must_have]))
+        temp = SVGElement("ellipse")
+        temp.add_attribute_dict(attributes)
+        self.children.append(temp)
 
     def add_text(self, text, attributes):
         # Yes....not handling quotes well yet

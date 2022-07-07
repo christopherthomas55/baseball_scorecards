@@ -3,7 +3,10 @@ SCALE = 15.0
 
 # Sideways paper for now
 DEFAULT_WIDTH = 110*SCALE
+#DEFAULT_HEIGHT = 85*SCALE
 DEFAULT_HEIGHT = 85*SCALE
+
+ANIMATED = False
 
 # Stright from wikipedia lol
 BASE_HEADER = """
@@ -12,6 +15,8 @@ BASE_HEADER = """
 
 # Numeric values are stored as proportions of larger element, kinda like css
 DEFAULT_SCOREBOOK = {
+        # If looping whats wait time for each frame
+        "wait_time": .5,
 
         "margin": .01,
 
@@ -31,6 +36,13 @@ DEFAULT_SCOREBOOK = {
         "Bases_prop": .75, # Have to be less than .95
         "numInnings": 10,
         "numBatters": 9,
+        # How big count boxes are as proportion
+        "count_size":.1,
+        # Where is play text top left?
+        "where_text_x": -.06,
+        "where_text_y": .48,
+        # Offset to get outs in center of diamond
+        "center_offset": .15,
 
         # Player name grid specifics
         "numSubs": 2,
@@ -41,3 +53,4 @@ DEFAULT_SCOREBOOK = {
         "counting_stats": ["R", "H", "LOB"],
         "is_sum_margin": 0,
 }
+

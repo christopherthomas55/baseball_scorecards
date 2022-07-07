@@ -1,20 +1,28 @@
 import json
+import sys
+from time import sleep
 import config
 from SVG_base import SVGBase
+from ABCellHolder import ABCellHolder
+from war_calc import war_calc
 
 
 class Scorebook(SVGBase):
     # Inherits add_SHAPE and save
-    def __init__(self, *args, **kwargs):
+    def __init__(self, home_away, *args, **kwargs):
         super().__init__()
         self.options = kwargs
+        self.ABs = ABCellHolder(parent=self)
+        self.home_away = home_away
 
         #TODO - Fill with default, not replace
         if not self.options:
             self.options = config.DEFAULT_SCOREBOOK
 
-        with open('live_jun_21_stros.json', 'r') as f:
+        with open('data/live_data.json', 'r') as f:
             self.json = json.load(f)
+
+        self.ABs.add_json(self.json)
 
         self._gen_grid()
         self._gen_player_names()
@@ -22,6 +30,7 @@ class Scorebook(SVGBase):
 
         self._gen_pitching_stats()
         self._gen_meta_stats()
+        self.ABs.gen()
 
     def _gen_grid(self):
         numInnings = self.options["numInnings"]
@@ -44,42 +53,14 @@ class Scorebook(SVGBase):
             )
 
             for y in range(numBatters):
-                self._add_ab_cell(
+                self.ABs._add_ab_cell(
+                        self,
                         grid_start_x + x*cell_x_size,
                         grid_start_x + (x+1)*cell_x_size,
                         grid_start_y + y*cell_y_size,
                         grid_start_y + (y+1)*cell_y_size
                 )
 
-    # TODO - THink about making square
-    def _add_ab_cell(self, x0, x1, y0, y1):
-        self.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),
-            "height":str(y1-y0), "stroke":"black", "x":str(x0), "y":str(y0)})
-
-
-        # Diamond is always a diamond not rhombus
-        max_height = self.options["Bases_prop"]*(y1-y0)
-        max_width  = self.options["Bases_prop"]*(x1-x0)
-        diamond_size = min(max_height, max_width)
-
-        # Aligning diamond based of max height and width allowed
-        # If scoresheet grids aren't very square may have issues
-        d_center_x = x1 - diamond_size/2.0 - (x1 - x0)*.05
-        d_center_y = y1 - diamond_size/2.0 - (y1 - y0)*.05
-
-        polyline_points = ""
-        # Home
-        polyline_points += str(d_center_x) + "," + str(d_center_y + diamond_size/2.0) + " "
-        # 1st
-        polyline_points += str(d_center_x + diamond_size/2.0)+ "," + str(d_center_y)  + " "
-        # 2rd
-        polyline_points += str(d_center_x) + "," + str(d_center_y - diamond_size/2.0) + " "
-        # 3rd
-        polyline_points += str(d_center_x - diamond_size/2.0)+ "," + str(d_center_y)  + " "
-        # Home again
-        polyline_points += str(d_center_x) + "," + str(d_center_y + diamond_size/2.0) + " "
-
-        self.add_polyline({"fill":"none", "stroke": "black", "points": polyline_points})
 
     def _add_label(self, label, x0, x1, y0, y1):
         self.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),
@@ -106,7 +87,9 @@ class Scorebook(SVGBase):
             }
         )
 
-        pass
+
+    def _add_ellipse(self, cx, cy, rx, ry, fill = "white", opacity = "0.05"):
+        self.add_ellipse({'cx': cx, 'cy': cy, 'rx': rx, 'ry': ry, 'fill': fill, 'opacity': opacity})
 
     # TODO - Reused code from genning the innings grid
     # All based on center, the scorecard
@@ -140,11 +123,9 @@ class Scorebook(SVGBase):
                 grid_start_y
         )
 
-        home_or_away = 'home'
-        batting_order = self.json['liveData']['boxscore']['teams'][home_or_away]['battingOrder']
+        batting_order = self.json['liveData']['boxscore']['teams'][self.home_away]['battingOrder']
         batting_names = [self.json['gameData']['players']['ID' + str(i)]['lastFirstName'] for i in batting_order]
 
-        print(batting_names)
         # JSON player name stuff
 
         # Generate in order of use, for ease in future
@@ -204,7 +185,6 @@ class Scorebook(SVGBase):
             )
             prev = lines_x[x]
 
-
         cell_y_size  = (grid_end_y - grid_start_y)/float(numBatters)
         # Generate in order of use, for ease in future
         for y in range(numBatters):
@@ -226,5 +206,56 @@ class Scorebook(SVGBase):
 
 
 if __name__ == "__main__":
-    test = Scorebook()
-    test.save("blank_scorebook.svg")
+
+
+    if config.ANIMATED:
+        while True:
+            away = Scorebook("away")
+            away.save("img/away_scorebook.svg")
+            json = away.json
+            away_war_people = war_calc(json["home"]["runTotal"], json, json["lineup"])
+            print(away_war_people)
+
+    # Need to find every json call here f. Here I go
+    # Done so far :  ---
+    # Not done:      All
+
+    # I gotta get them from the json at least. json["home']] might be list
+    # comprehension though
+    home = Scorebook("home")
+    home.save("img/home_scorebook.svg")
+    away = Scorebook("away")
+    away.save("img/away_scorebook.svg")
+    sys.exit()
+
+    j = home.json
+    runTotal  = j["liveData"]["boxscore"]["teams"]["home"]["teamStats"]["batting"]["runs"]
+    home_json = [x for x in j["liveData"]["plays"]["allPlays"] if not x["about"]["isTopInning"]]
+
+    batting_order_ids = j["liveData"]["boxscore"]["teams"]["home"]["battingOrder"]
+    player_metadata   =  0 # Needs something json["home"]["lineup"]
+
+    player_metadata = j["gameData"]["players"]
+    lineup = [player_metadata[x] for x in player_metadata]
+    #print(lineup)
+
+    home_war_people = war_calc(runTotal, home_json, lineup)
+    out = [(x, home_war_people[x]) for x in home_war_people.keys()]
+    out = sorted(out, key = lambda x: x[-1])
+    for i in out:
+        if i[1] >= 0:
+            print("%s: %s \n"%(i[0], str(i[1])))
+
+    j = away.json
+    runTotal  = j["liveData"]["boxscore"]["teams"]["away"]["teamStats"]["batting"]["runs"]
+    away_json = [x for x in j["liveData"]["plays"]["allPlays"] if x["about"]["isTopInning"]]
+
+    batting_order_ids = j["liveData"]["boxscore"]["teams"]["away"]["battingOrder"]
+    lineup = [player_metadata[x] for x in player_metadata]
+
+    away_war_people = war_calc(runTotal, away_json, lineup)
+    out = [(x, away_war_people[x]) for x in home_war_people.keys()]
+    out = sorted(out, key = lambda x: x[-1])
+    for i in out:
+        if i[1] >= 0:
+            print("%s: %s \n"%(i[0], str(i[1])))
