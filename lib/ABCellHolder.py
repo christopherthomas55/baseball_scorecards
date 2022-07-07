@@ -20,10 +20,23 @@ class ABCellHolder(object):
 
     #TODO - Lots needed here.....
     def handle_runners(self, runners):
-        all_runners = runners
-        runners = [x for x in runners if (x["movement"]["isOut"] is False)]
         # 4B when fielder's choice
         destinations = {"1B": 1, "2B": 2, "3B": 3, "score": 4, "4B": 4}
+
+        all_runners = runners
+        runners = [x for x in runners if (x["movement"]["isOut"] is False)]
+        maxOrigin = {}
+        for x in runners:
+            originBase = x["movement"]["originBase"]
+            endBase = x["movement"]["end"]
+            if originBase in maxOrigin:
+                if destinations[endBase] > maxOrigin[originBase]:
+                    maxOrigin[originBase] = destinations[endBase]
+            else:
+                maxOrigin[originBase] = destinations[endBase]
+        # TODO - disgusting
+        runners = [x for x in runners if maxOrigin.get(x["movement"]["originBase"], -1) == destinations[x["movement"]["end"]]]
+
         # Sorting to start with highest bases first
 
         runners = sorted(runners, key= lambda x: -destinations[x["movement"]["end"]])
