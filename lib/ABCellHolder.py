@@ -20,13 +20,25 @@ class ABCellHolder(object):
 
     #TODO - Lots needed here.....
     def handle_runners(self, runners):
-        # Trying is false
+        all_runners = runners
         runners = [x for x in runners if (x["movement"]["isOut"] is False)]
-        destinations = {"1B": 1, "2B": 2, "3B": 3, "score": 4}
+        # 4B when fielder's choice
+        destinations = {"1B": 1, "2B": 2, "3B": 3, "score": 4, "4B": 4}
         # Sorting to start with highest bases first
 
         runners = sorted(runners, key= lambda x: -destinations[x["movement"]["end"]])
 
+        # TODO - Messy
+        # To handle plays with multiple movemens we draw lines then move runners
+        for runner in all_runners:
+            start = destinations.get(runner["movement"]["originBase"], 0)
+            if not runner["movement"]["isOut"]:
+                end = destinations[runner["movement"]["end"]]
+            else:
+                end = destinations[runner["movement"]["outBase"]]
+            self.bases[start].add_movement(start, end, runner["movement"]["isOut"])
+
+        # TODO - I don't think this handles double steals, see above
         for runner in runners:
             start = destinations.get(runner["movement"]["originBase"], 0)
             end = destinations[runner["movement"]["end"]]

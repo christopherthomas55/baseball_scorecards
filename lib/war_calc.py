@@ -15,7 +15,6 @@ AVERAGE_RUNS_PER_SEASON = 7 # I think this is  useful
 PREVIOUS_EVENT = None
 
 
-
 # TO DO : Definitely still some issues. Team totals used everywhere..... just a
 # measure of how many more abs you make for your team since team totals is the
 # same for everyone. Need to make outs "decrease" team totals
@@ -78,18 +77,15 @@ def wins_happening_without_this_play(event, outs):
     if outs == 2:
         return event["team_total"]
 
-    print("HERE")
     next_one_please = event.get("next_one_please", None)
     if not next_one_please:
         return event["team_total"] + .5
 
     outs += 1
 
-    print("HERE2")
     if next_one_please == None:
         return event["team_total"]*.5
 
-    print("HERE3")
     print(event["team_total"])
     return wins_happening_without_this_play(next_one_please, outs)
 
@@ -145,9 +141,7 @@ def war_calc(total_game_score, all_events, all_players):
             max_outs = 0
         outs = max(max_outs, 0)
 
-        print("HEREA")
         #print(wins_happening_with_this_play(event, outs, total_game_score))
-        print("HEREB")
         #print(wins_happening_without_this_play(event, outs))
 
         player_war[player] += (1.0/AVERAGE_RUNS_PER_SEASON)*(

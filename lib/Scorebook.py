@@ -1,8 +1,9 @@
 import json
+import sys
+from time import sleep
 import config
 from SVG_base import SVGBase
 from ABCellHolder import ABCellHolder
-from time import sleep
 from war_calc import war_calc
 
 class Scorebook(SVGBase):
@@ -221,6 +222,11 @@ if __name__ == "__main__":
     # I gotta get them from the json at least. json["home']] might be list
     # comprehension though
     home = Scorebook("home")
+    home.save("img/home_scorebook.svg")
+    away = Scorebook("away")
+    away.save("img/away_scorebook.svg")
+    sys.exit()
+
     j = home.json
     runTotal  = j["liveData"]["boxscore"]["teams"]["home"]["teamStats"]["batting"]["runs"]
     home_json = [x for x in j["liveData"]["plays"]["allPlays"] if not x["about"]["isTopInning"]]
@@ -232,16 +238,13 @@ if __name__ == "__main__":
     lineup = [player_metadata[x] for x in player_metadata]
     #print(lineup)
 
-    home.save("img/home_scorebook.svg")
     home_war_people = war_calc(runTotal, home_json, lineup)
     out = [(x, home_war_people[x]) for x in home_war_people.keys()]
     out = sorted(out, key = lambda x: x[-1])
     for i in out:
-        print("%s: %s \n"%(i[0], str(i[1])))
-    sys.exit()
+        if i[1] >= 0:
+            print("%s: %s \n"%(i[0], str(i[1])))
 
-
-    away = Scorebook("away")
     j = away.json
     runTotal  = j["liveData"]["boxscore"]["teams"]["away"]["teamStats"]["batting"]["runs"]
     away_json = [x for x in j["liveData"]["plays"]["allPlays"] if x["about"]["isTopInning"]]
@@ -249,6 +252,9 @@ if __name__ == "__main__":
     batting_order_ids = j["liveData"]["boxscore"]["teams"]["away"]["battingOrder"]
     lineup = [player_metadata[x] for x in player_metadata]
 
-    away.save("img/away_scorebook.svg")
     away_war_people = war_calc(runTotal, away_json, lineup)
-    print(away_war_people)
+    out = [(x, away_war_people[x]) for x in home_war_people.keys()]
+    out = sorted(out, key = lambda x: x[-1])
+    for i in out:
+        if i[1] >= 0:
+            print("%s: %s \n"%(i[0], str(i[1])))
