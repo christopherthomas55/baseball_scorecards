@@ -14,7 +14,6 @@ class ABCellHolder(object):
         # Pointers to AB cell are stored below......batter is at 0 and bases
         # are 1-3
         self.bases = [None, None, None, None]
-        pass
 
     def _add_ab_cell(self, *args):
         self.all_abs.append( ABCell(*args) )
@@ -22,74 +21,80 @@ class ABCellHolder(object):
     def add_json(self, json):
         self.json = json
 
-    #TODO - Lots needed here.....
+    #TODO - Lots needed here.....fixed some ugliness but lots of artifacts
     def handle_runners(self, runners):
-        # 4B when fielder's choice
-        destinations = {"1B": 1, "2B": 2, "3B": 3, "score": 4, "4B": 4}
+        # 4B when fielder's choice to end inning
+        destinations = {"1B": 1, "2B": 2, "3B": 3, "score": 4, "4B": 4, "0B":0}   # This is the hackiest thing ever to add
 
         all_runners = runners
         runners = [x for x in runners if (x["movement"]["isOut"] is False)]
-        maxOrigin = {}
-        for x in runners:
-            originBase = x["movement"]["originBase"]
-            endBase = x["movement"]["end"]
-            if originBase in maxOrigin:
-                if destinations[endBase] > maxOrigin[originBase]:
-                    maxOrigin[originBase] = destinations[endBase]
-            else:
-                maxOrigin[originBase] = destinations[endBase]
-        # TODO - disgusting
-        runners = [x for x in runners if maxOrigin.get(x["movement"]["originBase"], -1) == destinations[x["movement"]["end"]]]
 
         # Sorting to start with highest bases first
-
         runners = sorted(runners, key= lambda x: -destinations[x["movement"]["end"]])
 
         # TODO - Messy
+        # This draws the  lines
         # To handle plays with multiple movemens we draw lines then move runners
         for runner in all_runners:
             start = destinations.get(runner["movement"]["originBase"], 0)
             if not runner["movement"]["isOut"]:
+                if not runner["movement"]["end"]:
+                    continue
                 end = destinations[runner["movement"]["end"]]
             else:
                 end = destinations[runner["movement"]["outBase"]]
             self.bases[start].add_movement(start, end, runner["movement"]["isOut"])
 
-        # TODO - I don't think this handles double steals, see above
-
-        #print(self.bases)
+        # This handles adding runs
         for runner in runners:
             start = destinations.get(runner["movement"]["originBase"], 0)
             end = destinations[runner["movement"]["end"]]
             if end == 4 and not runner["movement"]["isOut"]:
                 self.bases[start].add_run()
-            else:
-                self.bases[end] = self.bases[start]
-            self.bases[start] = None
 
-        # num runs
-        return len(runners), len([x for x in runners if destinations[x["movement"]["end"]] == 4])
+        # TODO - I don't think this handles double steals, see above
+        # This moves the runners around bases
+        def null_to_0B(s):
+            if s is None:
+                return "0B"
+            return s
+
+        # Get runners -> loc or isout map. 99 is counted as out
+        baseMap = {}
+        for x in all_runners:
+            basenum = destinations[null_to_0B(x["movement"]["originBase"])]
+            endbase = destinations[null_to_0B(x["movement"]["end"])]
+            if x["movement"]["isOut"]:
+                baseMap[basenum] = 99
+            baseMap[basenum] = max(endbase, baseMap.get(basenum, -1))
+
+        new_bases = [None, None, None, None]
+        for i in range(4):
+            if i not in baseMap:
+                new_bases[i] = self.bases[i]
+
+        for rm, val in baseMap.items():
+            if val < 4:
+                new_bases[val] = self.bases[rm]
+
+        self.bases = new_bases
+        return sum([1 for x in self.bases if x]), len([x for x in runners if destinations[x["movement"]["end"]] == 4])
 
 
     def handle_inning_totals(self, inning_no, runs, outs, numRunners):
         self.inning_runs[inning_no] += runs
         if outs >= 3:
-            self.inning_lob[inning_no] = numRunners - runs - 1
-            #self.parent.add_rect({
-            #       "fill": "white"
-            #   })
-
-
-            #self.parent.add_text
+            self.inning_lob[inning_no] = numRunners - runs
             # TODO - Lots of constans here...
             x0 = self.grid_pointer.x0
             x1 = self.grid_pointer.x1
             y0 = self.all_abs[8].y0 + 100
             y1 = self.all_abs[8].y1 + 100
             text =  "Runs: " + str(self.inning_runs[inning_no]) + "  "
-            text += "LOB: " + str(self.inning_lob[inning_no]) + "\n"
-
             self.parent._add_label(text, x0, x1, y0, y1)
+            text = "LOB: " + str(self.inning_lob[inning_no]) + "\n"
+            self.parent._add_label(text, x0, x1, y0+100, y1+100)
+
 
     def _add_label(self, label, x0, x1, y0, y1):
         self.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),
@@ -97,16 +102,12 @@ class ABCellHolder(object):
         )
 
 
-
-
-
     def gen(self):
         grid_pointer = 0
         outs = 0
         inning = 1
         looped = 0
-        for play in self.json['liveData']['plays']['allPlays']:
-            self.parent.save("img/home_scorebook.svg")
+        for count, play in enumerate(self.json['liveData']['plays']['allPlays']):
             isTop = self.parent.home_away == "away"
             if play['result']['type'] == 'atBat' and (play['about']['isTopInning'] == isTop):
                 self.all_abs[grid_pointer].add_count(play['count'])
@@ -118,11 +119,10 @@ class ABCellHolder(object):
                     (numRunners, num_runs) = self.handle_runners(play["runners"])
 
                     if play['about']['hasOut']:
-                        outs += 1
+                        all_outs_here = [x['movement']['outNumber'] for x in play['runners']]
+                        outs = max([x for x in all_outs_here if x])
 
-                    if "double_play" in play['result'].get('eventType').lower():
-                        outs += 1
-
+                    # TODO fix numRunners issues
                     self.grid_pointer = self.all_abs[grid_pointer]
                     self.handle_inning_totals(inning, num_runs, outs, numRunners)
 

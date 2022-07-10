@@ -79,8 +79,6 @@ class Scorebook(SVGBase):
 
     def _add_text(self, label, x0, x1, y0, y1):
         #import pdb; pdb.set_trace()
-
-        print("HERE")
         self.add_text(label, {"x":str(x0 + 10), "y":str((y1 + y0)/2.0),
             "dominant-baseline": "middle",
             "font-size": "x-large"
