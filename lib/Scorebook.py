@@ -61,6 +61,19 @@ class Scorebook(SVGBase):
                         grid_start_y + (y+1)*cell_y_size
                 )
 
+            # TODO move this elsewhere prob
+            # TODO parameterize
+            # This adds the summary a bottom
+            height_prop = .8
+            self.add_rect({"fill":"white", "fill-opacity":"0.0",
+                "width":str(cell_x_size),
+                "height":str(height_prop*cell_y_size),
+                "x":str(grid_start_x + x*cell_x_size),
+                "y":str(grid_start_y + (y+1)*cell_y_size),
+                "stroke":"black"})
+        self.ABs.summary_y = grid_start_y + (y+1)*cell_y_size
+        self.ABs.summary_height = cell_y_size*height_prop
+
 
     def _add_label(self, label, x0, x1, y0, y1):
         self.add_rect({"fill":"white", "fill-opacity":"0.0", "width":str(x1-x0),

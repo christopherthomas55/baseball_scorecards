@@ -25,60 +25,58 @@ class ABCellHolder(object):
     def handle_runners(self, runners):
         # 4B when fielder's choice to end inning
         destinations = {"1B": 1, "2B": 2, "3B": 3, "score": 4, "4B": 4, "0B":0}   # This is the hackiest thing ever to add
-
         all_runners = runners
-        runners = [x for x in runners if (x["movement"]["isOut"] is False)]
+        safe_runners = [x for x in runners if (x["movement"]["isOut"] is False)]
 
-        # Sorting to start with highest bases first
-        runners = sorted(runners, key= lambda x: -destinations[x["movement"]["end"]])
-
-        # TODO - Messy
-        # This draws the  lines
-        # To handle plays with multiple movemens we draw lines then move runners
-        for runner in all_runners:
-            start = destinations.get(runner["movement"]["originBase"], 0)
-            if not runner["movement"]["isOut"]:
-                if not runner["movement"]["end"]:
-                    continue
-                end = destinations[runner["movement"]["end"]]
-            else:
-                end = destinations[runner["movement"]["outBase"]]
-            self.bases[start].add_movement(start, end, runner["movement"]["isOut"])
-
-        # This handles adding runs
-        for runner in runners:
-            start = destinations.get(runner["movement"]["originBase"], 0)
-            end = destinations[runner["movement"]["end"]]
-            if end == 4 and not runner["movement"]["isOut"]:
-                self.bases[start].add_run()
-
-        # TODO - I don't think this handles double steals, see above
-        # This moves the runners around bases
         def null_to_0B(s):
             if s is None:
                 return "0B"
             return s
 
-        # Get runners -> loc or isout map. 99 is counted as out
-        baseMap = {}
+        # Find where each runnerid goes. Gets start, end and out
+        runner_map = {}
         for x in all_runners:
-            basenum = destinations[null_to_0B(x["movement"]["originBase"])]
-            endbase = destinations[null_to_0B(x["movement"]["end"])]
-            if x["movement"]["isOut"]:
-                baseMap[basenum] = 99
-            baseMap[basenum] = max(endbase, baseMap.get(basenum, -1))
+            r_id = x['details']['runner']['id']
+            if r_id not in runner_map:
+                runner_map[r_id] = {'start': destinations[null_to_0B(x['movement']['originBase'])],
+                                    'end': destinations[null_to_0B(x['movement']['end'])],
+                                    'out': x['movement']['isOut']
+                                   }
+            else:
+                runner_map[r_id]['start'] = min(runner_map[r_id]['start'], destinations[null_to_0B(x['movement']['originBase'])])
+                runner_map[r_id]['end'] = max(runner_map[r_id]['end'], destinations[null_to_0B(x['movement']['end'])])
+                runner_map[r_id]['out'] = runner_map[r_id]['out'] or x['movement']['isOut']
+
 
         new_bases = [None, None, None, None]
+        # If not in above this is a no movement andpass through
         for i in range(4):
-            if i not in baseMap:
+            if i not in {runner_map[x]['start'] for x in runner_map.keys()}:
                 new_bases[i] = self.bases[i]
 
-        for rm, val in baseMap.items():
-            if val < 4:
-                new_bases[val] = self.bases[rm]
+        # Move runners. Some strikeouts show up here so we check end vs start
+        # Also add runs
+        for mvmt in runner_map.keys():
+            start = runner_map[mvmt]['start']
+            end = runner_map[mvmt]['end']
+            out = runner_map[mvmt]['out']
+            if end != start:
+                self.bases[start].add_movement(start, end, out)
+
+            if end == 4 and not out:
+                self.bases[start].add_run()
+
+        # Filter runners still on bases
+        runner_map = {x:runner_map[x] for x in runner_map.keys() if not
+                runner_map[x]['out'] and runner_map[x]['end'] <= 3}
+
+        for mvmt in runner_map.keys():
+            basenum = runner_map[mvmt]['start']
+            endbase = runner_map[mvmt]['end']
+            new_bases[endbase] = self.bases[basenum]
 
         self.bases = new_bases
-        return sum([1 for x in self.bases if x]), len([x for x in runners if destinations[x["movement"]["end"]] == 4])
+        return sum([1 for x in self.bases if x]), len([x for x in safe_runners if destinations[x["movement"].get("end", 0)] == 4])
 
 
     def handle_inning_totals(self, inning_no, runs, outs, numRunners):
@@ -88,12 +86,12 @@ class ABCellHolder(object):
             # TODO - Lots of constans here...
             x0 = self.grid_pointer.x0
             x1 = self.grid_pointer.x1
-            y0 = self.all_abs[8].y0 + 100
-            y1 = self.all_abs[8].y1 + 100
+            y0 = self.summary_y
+            y1 = self.summary_y + self.summary_height*.8
             text =  "Runs: " + str(self.inning_runs[inning_no]) + "  "
-            self.parent._add_label(text, x0, x1, y0, y1)
-            text = "LOB: " + str(self.inning_lob[inning_no]) + "\n"
-            self.parent._add_label(text, x0, x1, y0+100, y1+100)
+            self.parent._add_text(text, x0, x1, y0, y1)
+            text = "LOB : " + str(self.inning_lob[inning_no]) + "\n"
+            self.parent._add_text(text, x0, x1, y1, y1)
 
 
     def _add_label(self, label, x0, x1, y0, y1):
