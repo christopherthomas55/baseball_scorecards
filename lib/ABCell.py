@@ -6,6 +6,12 @@ play_map = {
     "home_run":"HR",
     "strikeout": "K",
 }
+out_map = {
+    'fly_ball': 'F',
+    'popup': 'P',
+    'ground_ball': '',
+    'line_drive': 'L',
+}
 
 class ABCell(object):
     def __init__(self, parent, x0, x1, y0, y1):
@@ -87,6 +93,14 @@ class ABCell(object):
             self.parent._add_ellipse(x, y, (self.x1 - self.x0)*.1, (self.x1 -
                 self.x0)*.1, fill = "black", opacity = ".22")
 
+
+        main_event = play['playEvents'][-1]
+        if main_event['details']['description'] == 'In play, out(s)':
+            traj = main_event.get('hitData', {}).get('trajectory')
+            out_text = out_map.get(traj, '?')
+
+            #self.parent.other_team_pos
+            # TODO - match names....pain in the ass
 
         else:
             # Second x0 and y0 doesn't do anyhing

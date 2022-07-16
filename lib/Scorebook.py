@@ -24,8 +24,9 @@ class Scorebook(SVGBase):
 
         self.ABs.add_json(self.json)
 
-        self._gen_grid()
+        self.other_team_pos = {}
         self._gen_player_names()
+        self._gen_grid()
         self._gen_counting_stats()
 
         self._gen_pitching_stats()
@@ -107,6 +108,14 @@ class Scorebook(SVGBase):
     # TODO - Reused code from genning the innings grid
     # All based on center, the scorecard
     def _gen_player_names(self):
+        if self.home_away == "home":
+            team = "away"
+        else:
+            team = "home"
+        players = self.json['liveData']['boxscore']['teams'][team]['players']
+        live_player_ids =  [x for x in players if not players[x]['gameStatus']['isOnBench']]
+        active = [players[x] for x in players.keys() if x in live_player_ids]
+        self.other_team_pos = {x['person']['fullName']: x['position']['code'] for x in active}
 
         # Location stuff
         grid_start_x = self.options["margin"]*self.width
