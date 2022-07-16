@@ -94,13 +94,13 @@ class ABCell(object):
                 self.x0)*.1, fill = "black", opacity = ".22")
 
 
-        main_event = play['playEvents'][-1]
-        if main_event['details']['description'] == 'In play, out(s)':
-            traj = main_event.get('hitData', {}).get('trajectory')
-            out_text = out_map.get(traj, '?')
+            main_event = play['playEvents'][-1]
+            if main_event['details']['description'] == 'In play, out(s)':
+                traj = main_event.get('hitData', {}).get('trajectory')
+                out_text = out_map.get(traj, '?')
 
-            #self.parent.other_team_pos
-            # TODO - match names....pain in the ass
+                #self.parent.other_team_pos
+                # TODO - match names....pain in the ass
 
         else:
             # Second x0 and y0 doesn't do anyhing
