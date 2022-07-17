@@ -1,3 +1,5 @@
+import re
+
 play_map = {
     "walk": "BB",
     "single": "1B",
@@ -76,10 +78,8 @@ class ABCell(object):
     def add_play(self, play):
         play_code = play['result']["eventType"]
         text = play_map.get(play_code, play_code)
-
         if play["about"]["hasOut"]:
             # Second x and y don't do anyhing
-            self.parent._add_text(text, self.d_center_x - self.parent.options["center_offset"]*self.cell_w, self.d_center_x, self.d_center_y, self.d_center_y)
 
             out_num = str(max([x['movement']['outNumber'] for x in play['runners'] if x['movement']['outNumber']]))
             x = (self.d_center_x + self.x1 -.10*(self.x1 - self.x0))/2.0 # TODO - Fix .05 stranded
@@ -99,9 +99,20 @@ class ABCell(object):
                 traj = main_event.get('hitData', {}).get('trajectory')
                 out_text = out_map.get(traj, '?')
 
-                #self.parent.other_team_pos
                 # TODO - match names....pain in the ass
+                fielders = {}
+                for peeps in self.parent.other_team_pos.keys():
+                    res = re.search(peeps, play['result']['description'])
+                    if res:
+                        fielders[res.start()] = peeps
 
+                assert(fielders)
+
+                pos = [self.parent.other_team_pos[fielders[pers]] for pers in sorted(fielders.keys())]
+                out_text += '-'.join(pos)
+                text = out_text
+
+            self.parent._add_text(text, self.d_center_x - self.parent.options["center_offset"]*self.cell_w, self.d_center_x, self.d_center_y, self.d_center_y)
         else:
             # Second x0 and y0 doesn't do anyhing
             self.parent._add_text(text, self.x0 + (self.x1-self.x0)*self.parent.options["where_text_x"], self.x0, self.y0 + (self.y1 - self.y0)*self.parent.options["where_text_y"], self.y0 )
