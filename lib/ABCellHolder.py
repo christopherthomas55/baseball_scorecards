@@ -1,6 +1,6 @@
 from config import ANIMATED
 from ABCell import ABCell
-
+RUNNER_VERBOSE = False
 class ABCellHolder(object):
     def __init__(self, parent):
         self.all_abs = []
@@ -49,10 +49,16 @@ class ABCellHolder(object):
 
 
         new_bases = [None, None, None, None]
-        # If not in above this is a no movement andpass through
+        # If not in above runner_map this is a no movement andpass through
         for i in range(4):
             if i not in {runner_map[x]['start'] for x in runner_map.keys()}:
                 new_bases[i] = self.bases[i]
+
+        if RUNNER_VERBOSE:
+            print("------------------- \n")
+            print(all_runners)
+            print(self.bases)
+            print(runner_map)
 
         # Move runners. Some strikeouts show up here so we check end vs start
         # Also add runs

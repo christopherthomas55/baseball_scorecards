@@ -1,5 +1,6 @@
 import re
 
+sacfly = "SF"
 play_map = {
     "walk": "BB",
     "single": "1B",
@@ -7,6 +8,8 @@ play_map = {
     "triple": "3B",
     "home_run":"HR",
     "strikeout": "K",
+    "sac_fly": sacfly,
+    "hit_by_pitch": "HBP",
 }
 out_map = {
     'fly_ball': 'F',
@@ -100,9 +103,14 @@ class ABCell(object):
                 out_text = out_map.get(traj, '?')
 
                 # TODO - match names....pain in the ass
+                # Sometimes players with initials have spaces and periods
+                # issues. So just do letters in description
                 fielders = {}
                 for peeps in self.parent.other_team_pos.keys():
-                    res = re.search(peeps, play['result']['description'])
+                    reg = re.compile('[^a-zA-Z]')
+                    person_letters = reg.sub('', peeps)
+                    play_letters = play['result']['description']
+                    res = re.search(person_letters, reg.sub('', play_letters))
                     if res:
                         fielders[res.start()] = peeps
 
@@ -111,6 +119,37 @@ class ABCell(object):
                 pos = [self.parent.other_team_pos[fielders[pers]] for pers in sorted(fielders.keys())]
                 out_text += '-'.join(pos)
                 text = out_text
+
+            # Sometimes in play with runs and outs. Sac fly. Groundout
+            # TODO repeated code
+            # TODO should groundout be a sac?
+            if 'In play, run' in main_event['details']['description']:
+                traj = main_event.get('hitData', {}).get('trajectory')
+                out_text = out_map.get(traj)
+
+                # Also sac fly edge case
+                if text == sacfly:
+                    out_text = text
+
+                if out_text is not None:
+                    fielders = {}
+                    for peeps in self.parent.other_team_pos.keys():
+                        reg = re.compile('[^a-zA-Z]')
+                        person_letters = reg.sub('', peeps)
+                        play_letters = play['result']['description']
+                        res = re.search(person_letters, reg.sub('', play_letters))
+                        if res:
+                            fielders[res.start()] = peeps
+
+                    assert(fielders)
+
+                    pos = [self.parent.other_team_pos[fielders[pers]] for pers in sorted(fielders.keys())]
+                    out_text += '-'.join(pos)
+                    text = out_text
+
+
+            if 'field_out' in text:
+                print(main_event)
 
             self.parent._add_text(text, self.d_center_x - self.parent.options["center_offset"]*self.cell_w, self.d_center_x, self.d_center_y, self.d_center_y)
         else:
@@ -169,7 +208,9 @@ class ABCell(object):
                 "stroke-width": 3, "stroke": "black"
             })
 
-        if isOut and not (start==0 and end==1):
+        # There's some weid edge cases where daa will erroneously says a player
+        # goes backwards for out
+        if isOut and not (start==0 and end==1) and start <= end:
             previous = end-1
             current  = end
 

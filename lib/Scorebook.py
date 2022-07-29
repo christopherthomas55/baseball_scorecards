@@ -237,7 +237,6 @@ if __name__ == "__main__":
             away.save("img/away_scorebook.svg")
             json = away.json
             away_war_people = war_calc(json["home"]["runTotal"], json, json["lineup"])
-            print(away_war_people)
 
     # Need to find every json call here f. Here I go
     # Done so far :  ---
