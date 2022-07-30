@@ -1,1 +1,6 @@
-moderncv/
+data/
+img/
+*__pycache__*
+*.swp
+*.svg
+

@@ -1,7 +1,6 @@
 import config
 
 
-
 # Inconsistent with kwargs vs dicts
 class SVGElement:
     def __init__(self, name, **kwargs):
@@ -27,7 +26,7 @@ class SVGElement:
         assert(self.name)
         out = ' '.join(['{attr}="{val}"'.format(attr=attr, val=val) for attr, val in self.attributes.items()])
         if self.text is None:
-            return "<{name} {out} />\n".format(name=self.name, out=out)
+            return "<{name} {out}></{name}>\n".format(name=self.name, out=out)
         else:
             return "<{name} {out}>{text}</{name}>\n".format(name=self.name, text=self.text, out=out)
 
@@ -94,7 +93,7 @@ class SVGBase:
         assert(filename.endswith('.svg'))
 
         with open(filename, "w") as f:
-            f.write(config.BASE_HEADER.format(height=self.height, width=self.width))
+            f.write(config.BASE_HEADER.format(height=int(self.height), width=int(self.width)))
 
             for c in self.children:
                 f.write(c.get_xml())

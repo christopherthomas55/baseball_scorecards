@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Scorecard for gameid {{ gameid }}</title>
+</head>
+<body>
+  <a href="{{ url_for('main') }}">
+    Back to home
+  </a>
+  <h1> Away scorecard for gameid {{ gameid }}</h1>
+  <div>
+  {{ away_svg }}
+  </div>
+  <h1> Home scorecard for gameid {{ gameid }}</h1>
+  <div>
+  {{ home_svg }}
+  </div>
+</body>
+</html>

@@ -10,7 +10,7 @@ ANIMATED = False
 
 # Stright from wikipedia lol
 BASE_HEADER = """
-<svg width="{width}" height="{width}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n
+<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{width}" viewBox="0 0 {width} {height}"  xmlns:xlink="http://www.w3.org/1999/xlink">\n
 """
 
 # Numeric values are stored as proportions of larger element, kinda like css

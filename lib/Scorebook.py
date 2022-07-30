@@ -9,7 +9,7 @@ from war_calc import war_calc
 
 class Scorebook(SVGBase):
     # Inherits add_SHAPE and save
-    def __init__(self, home_away, *args, **kwargs):
+    def __init__(self, home_away, datajson, *args, **kwargs):
         super().__init__()
         self.options = kwargs
         self.ABs = ABCellHolder(parent=self)
@@ -19,7 +19,7 @@ class Scorebook(SVGBase):
         if not self.options:
             self.options = config.DEFAULT_SCOREBOOK
 
-        with open('data/live_data.json', 'r') as f:
+        with open(datajson, 'r') as f:
             self.json = json.load(f)
 
         self.ABs.add_json(self.json)
@@ -149,6 +149,8 @@ class Scorebook(SVGBase):
         batting_names = [self.json['gameData']['players']['ID' + str(i)]['lastFirstName'] for i in batting_order]
 
         # JSON player name stuff
+        if not batting_names:
+            raise Exception("No lineup")
 
         # Generate in order of use, for ease in future
         for count, y in enumerate(range(numBatters)):
@@ -244,12 +246,13 @@ if __name__ == "__main__":
 
     # I gotta get them from the json at least. json["home']] might be list
     # comprehension though
-    home = Scorebook("home")
+    home = Scorebook("home", "data/live_json.json")
     home.save("img/home_scorebook.svg")
-    away = Scorebook("away")
+    away = Scorebook("away", "data/live_json.json")
     away.save("img/away_scorebook.svg")
     sys.exit()
 
+    # TODO - Deprecated war code attempts
     j = home.json
     runTotal  = j["liveData"]["boxscore"]["teams"]["home"]["teamStats"]["batting"]["runs"]
     home_json = [x for x in j["liveData"]["plays"]["allPlays"] if not x["about"]["isTopInning"]]

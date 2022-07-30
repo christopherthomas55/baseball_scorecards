@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Scorecards for {{ datestr }}</title>
+</head>
+<body>
+  <h1> Scorebooks for {{ datestr }} baseball games </h1>
+    <ul id="navigation">
+    {% for item in games %}
+    <li>
+      <a href="{{ url_for('game_page', gameid=item[0]) }}">
+        {{ item[1]['away'] }} at {{ item[1]['home'] }}
+      </a>
+    </li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
