@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Markup
+from flask import Flask, render_template, Markup, redirect, url_for
 import datetime
 from lib.api_interfaces import get_date_game_ids, get_game, init_dir
 app = Flask(__name__)
@@ -15,12 +15,16 @@ def main():
 @app.route('/date/<datestr>')
 def date_page(datestr):
     games = get_date_game_ids(datestr)
-    return render_template('date_page.html', games=games, datestr=datestr)
+    d = datetime.datetime.strptime(datestr, "%Y-%m-%d")
+    next_day = (d + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    prev_day = (d - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    return render_template('date_page.html', games=games, datestr=datestr,
+            next_day=next_day, prev_day=prev_day)
 
 # TODO - Add last update
 @app.route('/game/<gameid>')
 def game_page(gameid):
-    isSuccess = get_game(gameid, refresh = True)
+    isSuccess = get_game(gameid, refresh = False)
     if isSuccess:
         home_file = isSuccess.get("home")
         away_file = isSuccess.get("away")
@@ -38,5 +42,5 @@ def game_page(gameid):
 @app.route('/game/<gameid>/refresh')
 def refresh_game(gameid):
     get_game(gameid, refresh = True)
-    return game_page(gameid)
+    return redirect(url_for('game_page', gameid=gameid))
 

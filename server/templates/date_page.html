@@ -5,6 +5,10 @@
 </head>
 <body>
   <h1> Scorebooks for {{ datestr }} baseball games </h1>
+
+  <a href="{{ url_for('date_page', datestr=prev_day) }}"> Previous day </a>
+  <a href="{{ url_for('date_page', datestr=next_day) }}"> Next day </a>
+  <a href="{{ url_for('main') }}"> Today </a>
     <ul id="navigation">
     {% for item in games %}
     <li>

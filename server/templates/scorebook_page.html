@@ -5,8 +5,14 @@
 </head>
 <body>
   <a href="{{ url_for('main') }}">
-    Back to home
+    Back to today's games
   </a>
+
+  <br>
+  <a href="{{ url_for('refresh_game', gameid=gameid) }}">
+    <button style="position:fixed; right:0;"> Refresh this game </button>
+  </a>
+
   <h1> Away scorecard for gameid {{ gameid }}</h1>
   <div>
   {{ away_svg }}
