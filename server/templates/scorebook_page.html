@@ -10,7 +10,7 @@
 
   <br>
   <div style="position:fixed; right:0;">
-    <p>Last updated XXXXXX min ago  </p>
+    <p>Last updated {{ age }} sec ago  </p>
     <a href="{{ url_for('refresh_game', gameid=gameid) }}">
       <button > Refresh this game </button>
     </a>

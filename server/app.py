@@ -30,22 +30,23 @@ def dateform():
 # TODO - Add last update
 @app.route('/game/<gameid>')
 def game_page(gameid):
-    try:
+    #try:
         isSuccess = get_game(gameid, refresh = False)
         if isSuccess:
             home_file = isSuccess.get("home")
             away_file = isSuccess.get("away")
+            age = isSuccess.get("age")
             with open(home_file, "r") as f:
                 home_svg = f.read()
             with open(away_file, "r") as f:
                 away_svg = f.read()
 
             return render_template('scorebook_page.html', home_svg=Markup(home_svg),
-                    away_svg=Markup(away_svg), gameid=gameid)
+                    away_svg=Markup(away_svg), gameid=gameid, age=age)
         else:
             raise("Not successful scorebook")
-    except:
-        return render_template('error_scorebook.html', gameid=gameid)
+    #except:
+        #return render_template('error_scorebook.html', gameid=gameid)
 
 # TODO - add button
 @app.route('/game/<gameid>/refresh')

@@ -1,6 +1,6 @@
 from config import ANIMATED
 from ABCell import ABCell
-RUNNER_VERBOSE = True
+RUNNER_VERBOSE = False
 class ABCellHolder(object):
     def __init__(self, parent):
         self.all_abs = []
