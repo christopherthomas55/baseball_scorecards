@@ -61,6 +61,9 @@ class Scorebook(SVGBase):
                         grid_start_y + y*cell_y_size,
                         grid_start_y + (y+1)*cell_y_size
                 )
+                x1 = grid_start_x + x*cell_x_size
+                y1 = grid_start_y + y*cell_y_size
+                # self._add_label("HERE", x1, x1, y1, y1)
 
             # TODO move this elsewhere prob
             # TODO parameterize

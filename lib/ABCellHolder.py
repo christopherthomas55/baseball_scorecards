@@ -1,6 +1,6 @@
 from config import ANIMATED
 from ABCell import ABCell
-RUNNER_VERBOSE = False
+RUNNER_VERBOSE = True
 class ABCellHolder(object):
     def __init__(self, parent):
         self.all_abs = []
@@ -111,9 +111,16 @@ class ABCellHolder(object):
         outs = 0
         inning = 1
         looped = 0
+        manfred_extra_runner = -1
         for count, play in enumerate(self.json['liveData']['plays']['allPlays']):
             isTop = self.parent.home_away == "away"
             if play['result']['type'] == 'atBat' and (play['about']['isTopInning'] == isTop):
+                if manfred_extra_runner > 0:
+                    self.bases = [None, None, None, None]
+                    self.bases[2] = self.all_abs[manfred_extra_runner]
+                    self.bases[2].gen_diamond()
+                    manfred_extra_runner = -1
+
                 self.all_abs[grid_pointer].add_count(play['count'])
                 self.all_abs[grid_pointer].gen_diamond()
                 if play['result'].get('eventType'):
@@ -138,10 +145,20 @@ class ABCellHolder(object):
                         self.bases = [None, None, None, None]
                         outs = 0
                         inning += 1
+
+                        # Extras in 2020
+                        # TODO - get year
+                        year = 2022
+                        playoffs = False
+                        if inning >= 10 and year in [2020, 2021, 2022] and not playoffs:
+                            manfred_extra_runner = grid_pointer + 9
+
                         if (grid_pointer+1)%9 == 0:
                             grid_pointer += 1
                         else:
                             grid_pointer += 10
+
+
 
                     elif ((grid_pointer+1)%9 == 0) and outs < 3: # to be explicit
                         grid_pointer -= 8
