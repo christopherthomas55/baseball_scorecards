@@ -3,7 +3,7 @@ import datetime
 import time
 from pathlib import Path
 import json
-from Scorebook import Scorebook
+from lib.Scorebook import Scorebook
 
 # Expect this to change
 API_URL='https://bdfed.stitch.mlbinfra.com/bdfed/transform-mlb-scoreboard?stitch_env=prod&sortTemplate=4&sportId=1&startDate={date}&endDate={date}'

@@ -1,5 +1,5 @@
-from config import ANIMATED
-from ABCell import ABCell
+from lib.config import ANIMATED
+from lib.ABCell import ABCell
 RUNNER_VERBOSE = False
 class ABCellHolder(object):
     def __init__(self, parent):

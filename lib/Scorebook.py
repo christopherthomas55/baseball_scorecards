@@ -1,10 +1,10 @@
 import json
 import sys
 from time import sleep
-import config
-from SVG_base import SVGBase
-from ABCellHolder import ABCellHolder
-from war_calc import war_calc
+import lib.config as config
+from lib.SVG_base import SVGBase
+from lib.ABCellHolder import ABCellHolder
+from lib.war_calc import war_calc
 
 
 class Scorebook(SVGBase):

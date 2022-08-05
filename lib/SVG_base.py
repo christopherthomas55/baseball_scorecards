@@ -1,4 +1,4 @@
-import config
+import lib.config as config
 
 
 # Inconsistent with kwargs vs dicts
