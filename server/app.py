@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Markup, redirect, url_for
+from flask import Flask, render_template, Markup, redirect, url_for, request
 import datetime
 from lib.api_interfaces import get_date_game_ids, get_game, init_dir
 app = Flask(__name__)
@@ -21,21 +21,30 @@ def date_page(datestr):
     return render_template('date_page.html', games=games, datestr=datestr,
             next_day=next_day, prev_day=prev_day)
 
+@app.route('/dateform')
+def dateform():
+    default = datetime.datetime.today().strftime("%Y-%m-%d")
+    datestr = request.args.get('date')
+    return redirect(url_for('date_page', datestr=datestr))
+
 # TODO - Add last update
 @app.route('/game/<gameid>')
 def game_page(gameid):
-    isSuccess = get_game(gameid, refresh = False)
-    if isSuccess:
-        home_file = isSuccess.get("home")
-        away_file = isSuccess.get("away")
-        with open(home_file, "r") as f:
-            home_svg = f.read()
-        with open(away_file, "r") as f:
-            away_svg = f.read()
+    try:
+        isSuccess = get_game(gameid, refresh = False)
+        if isSuccess:
+            home_file = isSuccess.get("home")
+            away_file = isSuccess.get("away")
+            with open(home_file, "r") as f:
+                home_svg = f.read()
+            with open(away_file, "r") as f:
+                away_svg = f.read()
 
-        return render_template('scorebook_page.html', home_svg=Markup(home_svg),
-                away_svg=Markup(away_svg), gameid=gameid)
-    else:
+            return render_template('scorebook_page.html', home_svg=Markup(home_svg),
+                    away_svg=Markup(away_svg), gameid=gameid)
+        else:
+            raise("Not successful scorebook")
+    except:
         return render_template('error_scorebook.html', gameid=gameid)
 
 # TODO - add button

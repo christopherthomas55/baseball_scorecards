@@ -9,9 +9,12 @@
   </a>
 
   <br>
-  <a href="{{ url_for('refresh_game', gameid=gameid) }}">
-    <button style="position:fixed; right:0;"> Refresh this game </button>
-  </a>
+  <div style="position:fixed; right:0;">
+    <p>Last updated XXXXXX min ago  </p>
+    <a href="{{ url_for('refresh_game', gameid=gameid) }}">
+      <button > Refresh this game </button>
+    </a>
+  </div>
 
   <h1> Away scorecard for gameid {{ gameid }}</h1>
   <div>

@@ -5,11 +5,18 @@
 </head>
 <body>
   <h1> Scorebooks for {{ datestr }} baseball games </h1>
+  <p>If you see an error, feel free to save gameid and contact me</p>
 
   <a href="{{ url_for('date_page', datestr=prev_day) }}"> Previous day </a>
   <a href="{{ url_for('date_page', datestr=next_day) }}"> Next day </a>
   <a href="{{ url_for('main') }}"> Today </a>
-    <ul id="navigation">
+  or select date here
+  <form action="{{ url_for('dateform') }}" method="get">
+    <input name="date" type="date" value="{{ datestr }}">
+    <input type="submit">
+  </form>
+
+  <ul id="navigation">
     {% for item in games %}
     <li>
       <a href="{{ url_for('game_page', gameid=item[0]) }}">
@@ -17,6 +24,6 @@
       </a>
     </li>
     {% endfor %}
-    </ul>
+  </ul>
 </body>
 </html>

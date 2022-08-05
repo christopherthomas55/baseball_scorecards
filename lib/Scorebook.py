@@ -246,9 +246,9 @@ if __name__ == "__main__":
 
     # I gotta get them from the json at least. json["home']] might be list
     # comprehension though
-    home = Scorebook("home", "data/live_json.json")
+    home = Scorebook("home", "data/live_data.json")
     home.save("img/home_scorebook.svg")
-    away = Scorebook("away", "data/live_json.json")
+    away = Scorebook("away", "data/live_data.json")
     away.save("img/away_scorebook.svg")
     sys.exit()
 
