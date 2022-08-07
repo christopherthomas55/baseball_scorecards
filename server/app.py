@@ -1,5 +1,6 @@
 from flask import Flask, render_template, Markup, redirect, url_for, request
 import datetime
+import pytz
 from lib.api_interfaces import get_date_game_ids, get_game, init_dir
 app = Flask(__name__)
 
@@ -10,7 +11,7 @@ def _init():
 
 @app.route("/")
 def main():
-    return date_page(datetime.datetime.today().strftime("%Y-%m-%d"))
+    return date_page(datetime.datetime.now(pytz.timezone('US/Central')).strftime("%Y-%m-%d"))
 
 @app.route('/date/<datestr>')
 def date_page(datestr):
@@ -27,7 +28,8 @@ def dateform():
     datestr = request.args.get('date')
     return redirect(url_for('date_page', datestr=datestr))
 
-# TODO - Add last update
+# TODO - Need to handle "no lineup" exceptions better. Probably in scorecard.py
+# not here
 @app.route('/game/<gameid>')
 def game_page(gameid):
     try:

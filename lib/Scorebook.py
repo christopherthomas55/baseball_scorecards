@@ -25,13 +25,14 @@ class Scorebook(SVGBase):
         self.ABs.add_json(self.json)
 
         self.other_team_pos = {}
-        self._gen_player_names()
+        is_lineup = self._gen_player_names()
         self._gen_grid()
-        self._gen_counting_stats()
+        if is_lineup:
+            self._gen_counting_stats()
 
-        self._gen_pitching_stats()
-        self._gen_meta_stats()
-        self.ABs.gen()
+            self._gen_pitching_stats()
+            self._gen_meta_stats()
+            self.ABs.gen()
 
     def _gen_grid(self):
         numInnings = self.options["numInnings"]
@@ -153,7 +154,8 @@ class Scorebook(SVGBase):
 
         # JSON player name stuff
         if not batting_names:
-            raise Exception("No lineup")
+            print("No lineup yet")
+            return False
 
         # Generate in order of use, for ease in future
         for count, y in enumerate(range(numBatters)):
@@ -178,6 +180,8 @@ class Scorebook(SVGBase):
             self.add_line({'x1': str(number_x), 'x2': str(number_x), 'y1':str(topy), 'y2':str(bottomy), 'stroke': 'black'})
             # Second is pposition
             self.add_line({'x1': str(position_x), 'x2': str(position_x), 'y1':str(topy), 'y2':str(bottomy), 'stroke': 'black'})
+
+        return True
 
 
     def _add_cell(self, x0, x1, y0, y1):
