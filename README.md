@@ -15,16 +15,17 @@ Maybe can make not blank for end of 2022 season!
 - Generate historical games/season quilts
 - Random game generator sent through another simulator?
 - Generator game outcomes of super mega baseball LOL
-=======
-Resume created wih package moderncv
-
-Unzip moderncv into this directory
-Create a ln in the directory to resume.tex
-Generate
 
 
 
+########################################################
+#                    Deployment Notes                  #
+########################################################
 
-Right now the latex file requires a apt install of texlive-fonts-extra to get fontawesome5.sty
+Running on a digital ocean instance. 
 
-That is a 1+Gb download for a single sty......but I am lazy
+Service name is baseball_scorecards, which runs the uwsgi stuff
+I am also running nginx to serve this, esp sicne that service also holds my empty blog
+
+I semi followed this guide, mostly changing config settings and names. Also no venv
+https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-20-04
