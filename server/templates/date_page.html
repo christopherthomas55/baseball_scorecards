@@ -25,5 +25,16 @@
     </li>
     {% endfor %}
   </ul>
+
+    {% for game_data in gamedatas %}
+      <h1> Away scorecard for gameid {{ game_data.gameid }}</h1>
+      <div>
+      {{ game_data.away_svg }}
+      </div>
+      <h1> Home scorecard for gameid {{ game_data.gameid }}</h1>
+      <div>
+      {{ game_data.home_svg }}
+      </div>
+    {% endfor %}
 </body>
 </html>

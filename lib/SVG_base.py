@@ -89,6 +89,16 @@ class SVGBase:
         self.children = []
         self.add_rect({"fill":"white", "width":self.width, "height":self.height, "stroke":"black", "x":"0", "y":"0"})
 
+    def to_string(self):
+        out = ""
+        out += config.BASE_HEADER.format(height=int(self.height), width=int(self.width))
+
+        for c in self.children:
+            out += c.get_xml()
+        out += "</svg>"
+        return out
+
+
     def save(self, filename):
         assert(filename.endswith('.svg'))
 

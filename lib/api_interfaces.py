@@ -74,7 +74,26 @@ def get_today_game_ids():
     return get_date_game_ids(datetime.datetime.today().strftime("%Y-%m-%d"))
 
 
+def game_to_svg(game):
+    # If not successful
+    if not game:
+        print(str(e))
+        return None
+        # return render_template('error_scorebook.html', gameid=gameid)
+    return game.get("home_svg"), game.get("away_svg")
+
+
+def load_svg_file(fname):
+    with open(home_file, "r") as f:
+        svg = fname.read()
+    return svg
+
+
 def get_game(gameid, refresh = False):
+    if type(gameid) == int:
+        gameid = str(int)
+    elif type(gameid) == tuple:
+        gameid = str(gameid[0])
     cache_f = (GAME_DIR/gameid).with_suffix('.json')
     url = GAME_URL.format(gameid=gameid)
 
@@ -91,4 +110,5 @@ def get_game(gameid, refresh = False):
     #except:
         #return False
     age = time.time() - cache_f.stat().st_mtime
-    return {"home": home_file, "away": away_file, "age": age}
+    return {"home": home_file, "away": away_file, "age": age, "id": gameid,
+            "home_svg": home.to_string(), "away_svg": away.to_string()}
