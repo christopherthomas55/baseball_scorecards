@@ -15,6 +15,7 @@ Maybe can make not blank for end of 2022 season!
 - Generate historical games/season quilts
 - Random game generator sent through another simulator?
 - Generator game outcomes of super mega baseball LOL
+- Animated svg like - https://news.ycombinator.com/item?id=44498133
 
 
 
